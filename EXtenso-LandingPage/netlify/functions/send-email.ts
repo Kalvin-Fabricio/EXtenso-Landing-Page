@@ -7,6 +7,7 @@ interface ContactPayload {
   plan?: string;
   message?: string;
   company?: string;
+  recaptchaToken?: string;
 }
 
 const ALLOWED_ORIGIN = process.env.ALLOWED_ORIGIN ?? "";
@@ -55,6 +56,42 @@ const handler: Handler = async (event: HandlerEvent) => {
       headers: corsHeaders(origin),
       body: JSON.stringify({ error: "Body inválido." }),
     };
+  }
+
+  const recaptchaToken = payload.recaptchaToken;
+  const recaptchaSecret = process.env.RECAPTCHA_SECRET_KEY;
+
+  if (recaptchaSecret) {
+    if (!recaptchaToken) {
+      return {
+        statusCode: 400,
+        headers: corsHeaders(origin),
+        body: JSON.stringify({ error: "reCAPTCHA obrigatório ausente." }),
+      };
+    }
+
+    try {
+      const verifyResponse = await fetch("https://www.google.com/recaptcha/api/siteverify", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: `secret=${recaptchaSecret}&response=${recaptchaToken}`,
+      });
+      const verifyData = (await verifyResponse.json()) as { success: boolean };
+      if (!verifyData.success) {
+        return {
+          statusCode: 400,
+          headers: corsHeaders(origin),
+          body: JSON.stringify({ error: "Falha na validação do reCAPTCHA." }),
+        };
+      }
+    } catch (error) {
+      console.error("Erro ao validar reCAPTCHA:", error);
+      return {
+        statusCode: 500,
+        headers: corsHeaders(origin),
+        body: JSON.stringify({ error: "Erro interno ao validar reCAPTCHA." }),
+      };
+    }
   }
 
   const name = payload.name?.trim() ?? "";

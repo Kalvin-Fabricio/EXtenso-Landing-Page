@@ -1,6 +1,10 @@
-import { useEffect, useState } from "react";
+import { useState, useRef } from "react";
 import type { FormEvent } from "react";
+import ReCAPTCHA from "react-google-recaptcha";
+import Lottie from "lottie-react";
+import { toast } from "react-toastify";
 import Button from "./Button";
+import checkmarkAnimation from "../assets/checkmark.json";
 
 const initialForm = {
   name: "",
@@ -13,22 +17,18 @@ const initialForm = {
 export default function ContactForm() {
   const [formData, setFormData] = useState(initialForm);
   const [loading, setLoading] = useState(false);
-  const [statusMessage, setStatusMessage] = useState("");
-  const [statusType, setStatusType] = useState<"success" | "error" | "">("");
+  const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const recaptchaRef = useRef<ReCAPTCHA>(null);
 
-  useEffect(() => {
-    if (!statusMessage) return undefined;
-
-    const timer = window.setTimeout(() => {
-      setStatusMessage("");
-      setStatusType("");
-    }, 6000);
-
-    return () => window.clearTimeout(timer);
-  }, [statusMessage]);
+  const siteKey = (import.meta.env.VITE_RECAPTCHA_SITE_KEY as string) || "6LeIxAcTAAAAAJcZVRqyhH71UI9gAK1Y65cG0t6H";
 
   const updateField = (field: keyof typeof initialForm, value: string) => {
     setFormData((currentData) => ({ ...currentData, [field]: value }));
+  };
+
+  const handleRecaptchaChange = (token: string | null) => {
+    setRecaptchaToken(token);
   };
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -36,15 +36,18 @@ export default function ContactForm() {
 
     if (formData.company) return;
 
+    if (!recaptchaToken) {
+      toast.error("Por favor, confirme que você não é um robô (reCAPTCHA).");
+      return;
+    }
+
     setLoading(true);
-    setStatusMessage("");
-    setStatusType("");
 
     try {
       const response = await fetch("/api/send-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, recaptchaToken }),
       });
 
       const data = (await response.json()) as { message?: string; error?: string };
@@ -53,17 +56,46 @@ export default function ContactForm() {
         throw new Error(data.error || "Não foi possível enviar sua mensagem.");
       }
 
+      toast.success("Mensagem enviada com sucesso!");
+      setIsSubmitted(true);
       setFormData(initialForm);
-      setStatusType("success");
-      setStatusMessage("Mensagem enviada com sucesso! O contato chegou no e-mail configurado.");
     } catch (error) {
       const message = error instanceof Error ? error.message : "Erro inesperado ao enviar.";
-      setStatusType("error");
-      setStatusMessage(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
   };
+
+  if (isSubmitted) {
+    return (
+      <div className="form-success-card">
+        <div className="success-lottie-container">
+          <Lottie
+            animationData={checkmarkAnimation}
+            loop={false}
+            style={{ width: 140, height: 140 }}
+          />
+        </div>
+        <h3>Mensagem Enviada!</h3>
+        <p>
+          Obrigado pelo contato. Recebemos sua mensagem e entraremos em contato em breve.
+        </p>
+        <Button
+          type="button"
+          text="Enviar outra mensagem"
+          secondary
+          onClick={() => {
+            setIsSubmitted(false);
+            setRecaptchaToken(null);
+            setTimeout(() => {
+              recaptchaRef.current?.reset();
+            }, 0);
+          }}
+        />
+      </div>
+    );
+  }
 
   return (
     <form className="inquiry-form" onSubmit={handleSubmit}>
@@ -131,7 +163,14 @@ export default function ContactForm() {
         />
       </div>
 
-      {statusMessage && <p className={`form-status ${statusType}`}>{statusMessage}</p>}
+      <div className="recaptcha-container">
+        <ReCAPTCHA
+          ref={recaptchaRef}
+          sitekey={siteKey}
+          onChange={handleRecaptchaChange}
+          theme="dark"
+        />
+      </div>
 
       <div className="form-submit-container">
         <Button type="submit" text={loading ? "Enviando..." : "Enviar mensagem"} disabled={loading} />

@@ -127,3 +127,49 @@
     padding-block: 76px;
   }
 }
+
+.recaptcha-container {
+  display: flex;
+  justify-content: center;
+  margin-block: 8px;
+}
+
+.form-success-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding-block: 30px;
+  animation: fadeIn 0.4s ease-out;
+}
+
+.success-lottie-container {
+  margin-bottom: 20px;
+}
+
+.form-success-card h3 {
+  margin: 0 0 10px 0;
+  font-size: 1.8rem;
+  letter-spacing: -0.04em;
+  color: var(--text);
+}
+
+.form-success-card p {
+  margin: 0 0 24px 0;
+  color: var(--muted);
+  font-size: 1.05rem;
+  max-width: 440px;
+  line-height: 1.6;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
