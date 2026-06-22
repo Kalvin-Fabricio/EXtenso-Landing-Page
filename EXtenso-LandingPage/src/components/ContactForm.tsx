@@ -21,7 +21,7 @@ export default function ContactForm() {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const recaptchaRef = useRef<ReCAPTCHA>(null);
 
-  const siteKey = (import.meta.env.VITE_RECAPTCHA_SITE_KEY as string) || "6LeIxAcTAAAAAJcZVRqyhH71UI9gAK1Y65cG0t6H";
+  const siteKey = (import.meta.env.VITE_RECAPTCHA_SITE_KEY as string) || "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI";
 
   const updateField = (field: keyof typeof initialForm, value: string) => {
     setFormData((currentData) => ({ ...currentData, [field]: value }));
