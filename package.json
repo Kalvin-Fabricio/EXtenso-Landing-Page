@@ -1,0 +1,9 @@
+{
+  "name": "extenso-landing-page-root",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "npm --prefix EXtenso-LandingPage run dev",
+    "build": "npm --prefix EXtenso-LandingPage run build"
+  }
+}
