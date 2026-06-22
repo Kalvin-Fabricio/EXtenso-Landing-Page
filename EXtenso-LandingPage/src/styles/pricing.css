@@ -1,0 +1,111 @@
+.tiers-section {
+  padding-block: 110px;
+  background: var(--bg-soft);
+}
+
+.tiers-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 22px;
+  align-items: stretch;
+}
+
+.tier-card {
+  position: relative;
+  padding: 32px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.12);
+}
+
+.tier-card.featured {
+  border-color: rgba(245, 129, 21, 0.55);
+  box-shadow: 0 20px 60px rgba(245, 129, 21, 0.16);
+  transform: translateY(-12px);
+}
+
+.featured-badge {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: var(--brand);
+  color: #242424;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.tier-name {
+  margin: 0 0 8px;
+  font-size: 1.5rem;
+}
+
+.tier-tagline {
+  display: block;
+  color: var(--muted);
+  font-weight: 700;
+  min-height: 24px;
+}
+
+.tier-price-box {
+  margin: 28px 0;
+  display: grid;
+  gap: 6px;
+}
+
+.tier-price {
+  font-size: clamp(2.2rem, 4vw, 3.3rem);
+  font-weight: 950;
+  letter-spacing: -0.08em;
+  color: var(--brand);
+}
+
+.tier-price-suffix {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.tier-features {
+  display: grid;
+  gap: 14px;
+  list-style: none;
+  padding: 0;
+  margin: 0 0 28px;
+}
+
+.tier-features li {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.tier-features svg {
+  flex: 0 0 18px;
+  width: 18px;
+  height: 18px;
+  margin-top: 2px;
+  fill: var(--brand);
+}
+
+.tier-card a,
+.tier-card button {
+  width: 100%;
+}
+
+@media (max-width: 900px) {
+  .tiers-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tier-card.featured {
+    transform: none;
+  }
+
+  .tiers-section {
+    padding-block: 76px;
+  }
+}
