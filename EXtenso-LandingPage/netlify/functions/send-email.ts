@@ -60,8 +60,15 @@ const handler: Handler = async (event: HandlerEvent) => {
 
   const recaptchaToken = payload.recaptchaToken;
   const recaptchaSecret = process.env.RECAPTCHA_SECRET_KEY;
+  const isLocalDev = process.env.NETLIFY_DEV === "true";
 
-  if (recaptchaSecret) {
+  console.log("--- DEBUG RECAPTCHA ---");
+  console.log("Loaded RECAPTCHA_SECRET_KEY:", recaptchaSecret);
+  console.log("Received token:", recaptchaToken ? `${recaptchaToken.substring(0, 15)}...` : "null");
+  console.log("Local Dev Mode:", isLocalDev);
+  console.log("-----------------------");
+
+  if (recaptchaSecret && !isLocalDev) {
     if (!recaptchaToken) {
       return {
         statusCode: 400,
@@ -76,12 +83,15 @@ const handler: Handler = async (event: HandlerEvent) => {
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: `secret=${recaptchaSecret}&response=${recaptchaToken}`,
       });
-      const verifyData = (await verifyResponse.json()) as { success: boolean };
+      const verifyData = (await verifyResponse.json()) as { success: boolean; "error-codes"?: string[] };
       if (!verifyData.success) {
+        console.error("Falha na verificação do reCAPTCHA do Google:", verifyData);
         return {
           statusCode: 400,
           headers: corsHeaders(origin),
-          body: JSON.stringify({ error: "Falha na validação do reCAPTCHA." }),
+          body: JSON.stringify({
+            error: `Falha na validação do reCAPTCHA. Motivo: ${verifyData["error-codes"]?.join(", ") ?? "desconhecido"}`
+          }),
         };
       }
     } catch (error) {
@@ -92,6 +102,8 @@ const handler: Handler = async (event: HandlerEvent) => {
         body: JSON.stringify({ error: "Erro interno ao validar reCAPTCHA." }),
       };
     }
+  } else if (isLocalDev) {
+    console.log("Ignorando verificação do reCAPTCHA do Google no ambiente de desenvolvimento local.");
   }
 
   const name = payload.name?.trim() ?? "";

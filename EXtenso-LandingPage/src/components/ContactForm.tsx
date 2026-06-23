@@ -1,10 +1,8 @@
 import { useState, useRef } from "react";
 import type { FormEvent } from "react";
 import ReCAPTCHA from "react-google-recaptcha";
-import Lottie from "lottie-react";
 import { toast } from "react-toastify";
 import Button from "./Button";
-import checkmarkAnimation from "../assets/checkmark.json";
 
 const initialForm = {
   name: "",
@@ -22,6 +20,7 @@ export default function ContactForm() {
   const recaptchaRef = useRef<ReCAPTCHA>(null);
 
   const siteKey = (import.meta.env.VITE_RECAPTCHA_SITE_KEY as string) || "6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI";
+  console.log("reCAPTCHA siteKey loaded:", siteKey);
 
   const updateField = (field: keyof typeof initialForm, value: string) => {
     setFormData((currentData) => ({ ...currentData, [field]: value }));
@@ -70,12 +69,11 @@ export default function ContactForm() {
   if (isSubmitted) {
     return (
       <div className="form-success-card">
-        <div className="success-lottie-container">
-          <Lottie
-            animationData={checkmarkAnimation}
-            loop={false}
-            style={{ width: 140, height: 140 }}
-          />
+        <div className="success-checkmark-container">
+          <svg className="success-checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+            <circle className="checkmark-circle" cx="26" cy="26" r="25" fill="none"/>
+            <path className="checkmark-check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+          </svg>
         </div>
         <h3>Mensagem Enviada!</h3>
         <p>
